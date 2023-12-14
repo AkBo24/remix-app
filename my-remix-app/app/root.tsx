@@ -66,7 +66,13 @@ export default function App() {
                         <Form
                             id='search-form'
                             role='search'
-                            onChange={(event) => submit(event.currentTarget)}>
+                            onChange={(event) => {
+                                const isFirstSearch = q === null;
+                                submit(event.currentTarget, {
+                                    replace: !isFirstSearch,
+                                });
+                                submit(event.currentTarget);
+                            }}>
                             <input
                                 id='q'
                                 aria-label='Search contacts'

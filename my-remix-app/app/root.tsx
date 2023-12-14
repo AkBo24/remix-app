@@ -12,6 +12,7 @@ import {
     ScrollRestoration,
     useLoaderData,
     useNavigation,
+    useSubmit,
 } from '@remix-run/react';
 
 import { useEffect, useState } from 'react';
@@ -36,6 +37,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 export default function App() {
     const { contacts, q } = useLoaderData<typeof loader>();
     const navigation = useNavigation();
+    const submit = useSubmit();
 
     // the query now needs to be kept in state
     const [query, setQuery] = useState(q || '');
@@ -58,7 +60,10 @@ export default function App() {
                 <div id='sidebar'>
                     <h1>Remix Contacts</h1>
                     <div>
-                        <Form id='search-form' role='search'>
+                        <Form
+                            id='search-form'
+                            role='search'
+                            onChange={(event) => submit(event.currentTarget)}>
                             <input
                                 id='q'
                                 aria-label='Search contacts'

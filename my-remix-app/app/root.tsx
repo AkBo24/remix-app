@@ -14,8 +14,9 @@ import {
     useNavigation,
 } from '@remix-run/react';
 
-import type { LinksFunction } from '@remix-run/node';
+import { useEffect, useState } from 'react';
 
+import type { LinksFunction, LoaderFunctionArgs } from '@remix-run/node';
 import { createEmptyContact, getContacts } from './data';
 import appStylesHref from './app.css';
 
@@ -25,14 +26,25 @@ export const action = async () => {
 };
 
 export const links: LinksFunction = () => [{ rel: 'stylesheet', href: appStylesHref }];
-export const loader = async () => {
-    const contacts = await getContacts();
-    return json({ contacts });
+export const loader = async ({ request }: LoaderFunctionArgs) => {
+    const url = new URL(request.url);
+    const q = url.searchParams.get('q');
+    const contacts = await getContacts(q);
+    return json({ contacts, q });
 };
 
 export default function App() {
-    const { contacts } = useLoaderData<typeof loader>();
+    const { contacts, q } = useLoaderData<typeof loader>();
     const navigation = useNavigation();
+
+    // the query now needs to be kept in state
+    const [query, setQuery] = useState(q || '');
+
+    // we still have a `useEffect` to synchronize the query
+    // to the component state on back/forward button clicks
+    useEffect(() => {
+        setQuery(q || '');
+    }, [q]);
 
     return (
         <html lang='en'>
@@ -50,6 +62,10 @@ export default function App() {
                             <input
                                 id='q'
                                 aria-label='Search contacts'
+                                // switched to `value` from `defaultValue`
+                                value={query}
+                                // synchronize user's input to component state
+                                onChange={(event) => setQuery(event.currentTarget.value)}
                                 placeholder='Search'
                                 type='search'
                                 name='q'
